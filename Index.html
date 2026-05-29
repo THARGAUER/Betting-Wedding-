@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Wedding Bets</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#0f0d0b;font-family:'DM Sans',sans-serif;min-height:100vh}
+button{font-family:'DM Sans',sans-serif;cursor:pointer;border:none}
+input,textarea,select{font-family:'DM Sans',sans-serif}
+input:focus,textarea:focus,select:focus{outline:none}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .4s ease forwards}
+.screen{display:none;flex-direction:column;align-items:center;min-height:100vh;padding:0 0 80px}
+.screen.active{display:flex}
+.card{background:rgba(255,255,255,.05);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:36px 30px;width:100%;box-shadow:0 12px 60px rgba(0,0,0,.5);margin-top:40px}
+.pill{display:inline-block;background:rgba(201,168,76,.18);color:#C9A84C;padding:4px 14px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.heading{font-family:'Cormorant Garamond',serif;font-weight:700;color:#f5ece3;line-height:1.2;margin-bottom:10px}
+.subtext{color:rgba(255,255,255,.45);font-size:14px;line-height:1.65}
+.btn-p{padding:13px 26px;border-radius:10px;border:none;background:linear-gradient(135deg,#C97B6E,#C9A84C);color:#fff;font-weight:700;font-size:14px;cursor:pointer}
+.btn-s{padding:13px 18px;border-radius:10px;border:1.5px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.6);font-size:14px;cursor:pointer}
+.btn-danger{padding:7px 14px;border-radius:7px;border:none;background:rgba(201,80,70,.25);color:#e07070;font-size:12px;font-weight:700;cursor:pointer}
+.inp{width:100%;padding:13px 15px;border-radius:10px;border:1.5px solid rgba(255,255,255,.12);font-size:16px;color:#f5ece3;background:rgba(255,255,255,.07)}
+.lbl{display:block;font-size:11px;font-weight:700;color:rgba(255,255,255,.45);margin-bottom:8px;letter-spacing:.08em;text-transform:uppercase}
+.footer{margin-top:24px;font-size:12px;color:rgba(255,255,255,.2);text-align:center}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}
+.flip-wrap{perspective:1000px;height:196px}
+.flip-inner{position:relative;width:100%;height:100%;transition:transform .45s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d}
+.flip-inner.flipped{transform:rotateY(180deg)}
+.flip-front,.flip-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;padding:16px 14px 13px}
+.flip-back{transform:rotateY(180deg);gap:5px;overflow-y:auto}
+.opt-btn{width:100%;padding:8px 11px;border-radius:8px;border:1.5px solid rgba(255,255,255,.22);background:rgba(255,255,255,.12);color:#fff;font-size:12px;text-align:left;line-height:1.3;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .12s}
+.opt-btn:hover{background:rgba(255,255,255,.28)}
+.opt-btn.picked{background:rgba(255,255,255,.92)!important;color:#1a1208!important;font-weight:700;border-color:transparent}
+.pick-header{position:sticky;top:0;z-index:50;width:100%;max-width:700px;background:rgba(15,13,11,.94);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.07);padding:12px 20px 0}
+.pick-grid{width:100%;max-width:700px;padding:20px 16px 100px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tab-btn{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid rgba(255,255,255,.12);background:transparent;color:rgba(255,255,255,.5);white-space:nowrap;flex-shrink:0;cursor:pointer}
+.tab-btn.active{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3)}
+.progress-bar{height:3px;background:rgba(255,255,255,.08);border-radius:2px;margin-bottom:12px}
+.progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#C97B6E,#C9A84C);transition:width .3s ease}
+.float-btn{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:100;display:none}
+.admin-input{width:100%;padding:10px 13px;border-radius:8px;border:1px solid rgba(201,168,76,.3);background:rgba(255,255,255,.06);color:#f5ece3;font-size:13px}
+.admin-input:focus{border-color:rgba(201,168,76,.7)}
+.admin-input option{background:#1a1208}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:999}
+.modal-bg.open{display:flex}
+.sub-row{border-radius:10px;padding:14px 16px;margin-bottom:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
+.winner-card{background:linear-gradient(135deg,rgba(201,168,76,.13),rgba(201,120,110,.13));border:1px solid rgba(201,168,76,.33);border-radius:14px;padding:20px;margin-bottom:20px}
+.confirm-modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:9999}
+.confirm-modal.open{display:flex}
+.rank-row{display:flex;align-items:center;gap:14px;padding:12px 16px;border-radius:10px;margin-bottom:8px}
+.my-rank-row{border:2px solid #C9A84C !important;background:rgba(201,168,76,0.08) !important}
+</style>
+</head>
+<body>
+
+<!-- WELCOME -->
+<div id="screen-welcome" class="screen active" style="align-items:center">
+  <div class="card fade-up" style="max-width:440px;text-align:center">
+    <div style="font-size:54px;margin-bottom:14px">💌</div>
+    <span class="pill">Wedding Bets</span>
+    <h1 class="heading" style="margin-top:14px;font-size:36px">Place Your Bets</h1>
+    <p class="subtext" style="margin-bottom:24px">Browse bets across 4 categories. Flip any card to make your pick — choose at least <strong style="color:#f5ece3">10</strong>, or answer as many as you want.</p>
+    <label class="lbl">Your name</label>
+    <input class="inp" id="nameInput" placeholder="First & last name" autocomplete="off"/>
+    <button class="btn-p" style="width:100%;margin-top:14px" id="startBtn">Let's go &rarr;</button>
+    <div style="margin-top:16px;border-top:1px solid rgba(255,255,255,.08);padding-top:16px">
+      <p style="font-size:12px;color:rgba(255,255,255,.3);margin-bottom:10px">Already submitted? Check your results.</p>
+      <button class="btn-s" style="width:100%;font-size:13px" onclick="showScreen('login')">View my results &rarr;</button>
+    </div>
+  </div>
+  <button id="adminBtn" style="margin-top:20px;background:transparent;border:none;color:rgba(255,255,255,.18);font-size:12px;cursor:pointer">Admin</button>
+  <p class="footer">No real money. Just glory.</p>
+</div>
+
+<!-- LOGIN (returning user) -->
+<div id="screen-login" class="screen" style="align-items:center">
+  <div class="card fade-up" style="max-width:420px;text-align:center">
+    <div style="font-size:44px;margin-bottom:12px">🔍</div>
+    <span class="pill">Your Results</span>
+    <h2 class="heading" style="font-size:28px;margin-top:12px">Find your entry</h2>
+    <p class="subtext" style="margin-bottom:22px">Enter the name you used when you submitted your bets.</p>
+    <label class="lbl">Your name</label>
+    <input class="inp" id="loginNameInput" placeholder="First & last name" autocomplete="off"/>
+    <div id="loginError" style="font-size:12px;color:#C97B6E;margin-top:8px;display:none">No entry found with that name. Check spelling.</div>
+    <button class="btn-p" style="width:100%;margin-top:14px" id="loginBtn">Find my entry &rarr;</button>
+    <button class="btn-s" style="width:100%;margin-top:10px" onclick="showScreen('welcome')">&#8592; Back</button>
+  </div>
+  <p class="footer">No real money. Just glory.</p>
+</div>
+
+<!-- MY RESULTS -->
+<div id="screen-myresults" class="screen" style="align-items:center">
+  <div style="width:100%;max-width:560px;padding:0 16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;margin-bottom:20px">
+      <div>
+        <span class="pill">My Results</span>
+        <div class="heading" style="font-size:28px;margin-top:8px;margin-bottom:0" id="myResultsName"></div>
+      </div>
+      <button class="btn-s" style="font-size:13px;padding:9px 16px" onclick="showScreen('welcome')">&#8592; Back</button>
+    </div>
+
+    <!-- Score banner -->
+    <div id="myScoreBanner" style="background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,120,110,.15));border:1px solid rgba(201,168,76,.3);border-radius:14px;padding:18px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#C9A84C;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">My Score</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;color:#f5ece3" id="myScoreNum">—</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px">My Rank</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;color:#f5ece3" id="myRankNum">—</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="tab-btn active" id="rtab-picks" onclick="switchResultsTab('picks')">My Picks</button>
+      <button class="tab-btn" id="rtab-leaderboard" onclick="switchResultsTab('leaderboard')">Leaderboard</button>
+    </div>
+
+    <div id="resultsContent"></div>
+  </div>
+</div>
+
+<!-- PICK -->
+<div id="screen-pick" class="screen">
+  <div class="pick-header">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <span class="pill">Wedding Bets</span>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span id="pickCount" style="font-size:13px;font-weight:600;color:rgba(255,255,255,.5)">0 selected</span>
+        <button class="btn-p" id="reviewBtn" style="padding:7px 16px;font-size:12px;display:none" onclick="goReview()">Review &rarr;</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:12px" id="catTabs"></div>
+  </div>
+  <div class="pick-grid" id="cardGrid"></div>
+  <div class="float-btn" id="floatBtn">
+    <button class="btn-p" style="padding:14px 36px;font-size:15px;box-shadow:0 8px 32px rgba(201,120,110,.4);border-radius:40px" onclick="goReview()">Review my picks &rarr;</button>
+  </div>
+</div>
+
+<!-- REVIEW -->
+<div id="screen-review" class="screen" style="align-items:center">
+  <div class="card fade-up" style="max-width:520px">
+    <div style="font-size:42px;margin-bottom:10px">📋</div>
+    <h2 class="heading" style="font-size:28px">Review Your Picks</h2>
+    <p class="subtext" style="margin-bottom:18px" id="reviewSubtext"></p>
+    <div id="reviewList" style="display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto;margin-bottom:16px"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn-s" onclick="showScreen('pick')">&#8592; Edit</button>
+      <button class="btn-p" style="flex:1" onclick="lockIn()">Lock in my bets 🔒</button>
+    </div>
+  </div>
+  <p class="footer">No real money. Just glory.</p>
+</div>
+
+<!-- DONE -->
+<div id="screen-done" class="screen" style="align-items:center">
+  <div class="card fade-up" style="max-width:460px;text-align:center">
+    <div style="font-size:62px;margin-bottom:12px">🥂</div>
+    <h1 class="heading" style="font-size:28px;margin-bottom:8px">You're in!</h1>
+    <p class="subtext" style="margin-bottom:22px" id="doneSubtext"></p>
+    <div id="doneList" style="display:flex;flex-direction:column;gap:7px;max-height:340px;overflow-y:auto;margin-bottom:18px"></div>
+    <div style="display:flex;gap:8px;flex-direction:column">
+      <button class="btn-p" onclick="viewMyResults()">View my results &rarr;</button>
+      <button class="btn-s" onclick="resetApp()">Submit another entry</button>
+    </div>
+  </div>
+  <p class="footer">No real money. Just glory.</p>
+</div>
+
+<!-- ADMIN -->
+<div id="screen-admin" class="screen">
+  <div style="background:rgba(201,168,76,.08);border-bottom:1px solid rgba(201,168,76,.2);padding:18px 24px;display:flex;justify-content:space-between;align-items:center;width:100%">
+    <div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:#C9A84C">Admin Panel</div>
+      <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px" id="adminSubhead"></div>
+    </div>
+    <button class="btn-s" onclick="showScreen('welcome')">&#8592; Back</button>
+  </div>
+  <div style="display:flex;gap:8px;padding:16px 24px 0;overflow-x:auto;width:100%">
+    <button class="tab-btn active" id="atab-answers" onclick="switchAdminTab('answers')">🎯 Log Answers</button>
+    <button class="tab-btn" id="atab-questions" onclick="switchAdminTab('questions')">Edit Questions</button>
+    <button class="tab-btn" id="atab-submissions" onclick="switchAdminTab('submissions')">Submissions</button>
+    <button class="tab-btn" id="atab-leaderboard" onclick="switchAdminTab('leaderboard')">Leaderboard</button>
+  </div>
+  <div style="max-width:720px;width:100%;margin:0 auto;padding:24px 20px" id="adminContent"></div>
+</div>
+
+<!-- ADMIN LOGIN MODAL -->
+<div class="modal-bg" id="adminModal">
+  <div class="card fade-up" style="max-width:360px;margin-top:0">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:#C9A84C;margin-bottom:6px">Admin Access</div>
+    <p style="font-size:13px;color:rgba(255,255,255,.4);margin-bottom:16px">Enter your password to continue.</p>
+    <input class="admin-input" type="password" id="adminPwInput" placeholder="Password" style="margin-bottom:10px"/>
+    <div id="adminPwError" style="font-size:12px;color:#C97B6E;margin-bottom:8px;display:none">Incorrect password.</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-s" style="flex:1" onclick="closeAdminModal()">Cancel</button>
+      <button class="btn-p" style="flex:1" onclick="tryAdmin()">Enter</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="confirm-modal" id="confirmModal">
+  <div class="card fade-up" style="max-width:340px;margin-top:0">
+    <div style="font-size:32px;margin-bottom:10px;text-align:center">🗑️</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#f5ece3;margin-bottom:8px;text-align:center" id="confirmTitle"></div>
+    <p style="font-size:13px;color:rgba(255,255,255,.45);margin-bottom:20px;text-align:center" id="confirmMsg"></p>
+    <div style="display:flex;gap:8px">
+      <button class="btn-s" style="flex:1" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-danger" style="flex:1;padding:13px" id="confirmOkBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var ADMIN_PW = "sawyer";
+var MIN_REQUIRED = 10;
+var CATEGORIES = ["Ceremony","Speeches","Reception","Wildcard"];
+var CAT_EMOJI = {Ceremony:"💍",Speeches:"🎤",Reception:"🥂",Wildcard:"🃏"};
+var CAT_COLORS = {
+  Ceremony:{accent:"#9B6DB5",grad:"135deg,#9B6DB5,#7a50a0"},
+  Speeches:{accent:"#C97B6E",grad:"135deg,#C97B6E,#a85a4e"},
+  Reception:{accent:"#4A8C6F",grad:"135deg,#4A8C6F,#306b52"},
+  Wildcard:{accent:"#C9A84C",grad:"135deg,#C9A84C,#a88530"}
+};
+
+// ── SINGLE SOURCE OF TRUTH ───────────────────────────────────────────────────
+var questions = [
+  {id:"groom_cry",label:"Will the groom cry during the vows?",emoji:"😭",category:"Ceremony",type:"choice",options:["Yes, full tears","Misty but holds it","Stoic king","Both cry together"]},
+  {id:"bride_cry",label:"Will the bride cry during the vows?",emoji:"💍",category:"Ceremony",type:"choice",options:["Yes, full tears","Misty but holds it","Composed queen","Both cry together"]},
+  {id:"processional_cry",label:"Will anyone cry during the processional?",emoji:"🚶",category:"Ceremony",type:"choice",options:["Yes - a parent","Yes - a guest","Yes - multiple people","Nobody holds it together"]},
+  {id:"ring_drop",label:"Will the ring bearer drop the rings?",emoji:"🪄",category:"Ceremony",type:"choice",options:["Yes, absolutely","Close call, recovered","Smooth delivery","No ring bearer"]},
+  {id:"flower_girl_pose",label:"Will the flower girl stop and pose?",emoji:"🌸",category:"Ceremony",type:"choice",options:["Full stop pose","She waves to someone","She runs","Professional walk"]},
+  {id:"phone_goes_off",label:"Will anyone's phone go off during the ceremony?",emoji:"📱",category:"Ceremony",type:"choice",options:["Yes - awkward silence","Yes - silenced fast","Nope, everyone behaved","The officiant's phone goes off"]},
+  {id:"ceremony_length",label:"How long will the ceremony run?",emoji:"⏱️",category:"Ceremony",type:"choice",options:["Under 20 min","20-30 min","30-45 min","Over 45 min (send help)"]},
+  {id:"vows_forgotten",label:"Will the couple forget any part of their vows?",emoji:"📜",category:"Ceremony",type:"choice",options:["Yes - bride blanks","Yes - groom blanks","Both flub something","Flawless delivery"]},
+  {id:"officiant_flub",label:"Will the officiant flub a name or line?",emoji:"🧑",category:"Ceremony",type:"choice",options:["Mispronounces a name","Loses their place","Tiny stumble, recovers","Perfect from start to finish"]},
+  {id:"ido_louder",label:"Who says I do louder?",emoji:"🔊",category:"Ceremony",type:"choice",options:["The bride","The groom","Dead even","Neither - barely audible"]},
+  {id:"first_kiss_long",label:"Will the first kiss last longer than 5 seconds?",emoji:"💋",category:"Ceremony",type:"choice",options:["Yes, crowd goes wild","Short and sweet","Way too long","Officiant moves things along"]},
+  {id:"train_stepped",label:"Will the bride's train get stepped on?",emoji:"👗",category:"Ceremony",type:"choice",options:["By the groom","By a wedding party member","By herself","No train mishaps"]},
+  {id:"someone_objects",label:"Will anyone object?",emoji:"🙋",category:"Ceremony",type:"choice",options:["Yes (chaos)","No but someone looks like they want to","Smooth and civil","No speak now moment"]},
+  {id:"best_man_5min",label:"Will the best man's speech go over 5 minutes?",emoji:"🎤",category:"Speeches",type:"choice",options:["Under 3 min (bless)","3-5 min (nailed it)","5-8 min (dicey)","8+ min (pull the plug)"]},
+  {id:"moh_cry",label:"Will the maid of honor cry during her speech?",emoji:"😢",category:"Speeches",type:"choice",options:["Full breakdown","Misty but recovers","Tearing up, holds it","Completely composed"]},
+  {id:"best_man_embarrassing",label:"Will the best man mention an embarrassing story?",emoji:"🔥",category:"Speeches",type:"choice",options:["Yes - roast level","Yes - PG version","Teases it, pulls back","Wholesome only"]},
+  {id:"fob_cry",label:"Will the father-of-the-bride cry?",emoji:"👨",category:"Speeches",type:"choice",options:["Full tears","Choked up, holds it","Military stoic","Makes everyone else cry"]},
+  {id:"fbomb",label:"Will anyone drop an F-bomb in their speech?",emoji:"🤐",category:"Speeches",type:"choice",options:["Yes, intentional","Yes, accidental","Almost, self-censored","Absolutely not"]},
+  {id:"unplanned_speech",label:"Will anyone give an unplanned speech?",emoji:"🙋",category:"Speeches",type:"choice",options:["Grabs mic uninvited","Asked in the moment","Almost, but stopped","Tight guest list control"]},
+  {id:"starts_keep_it_short",label:"Anyone start with I was told to keep this short?",emoji:"😏",category:"Speeches",type:"choice",options:["Yes, longest one","Yes, actually does","Nope","Says it, finishes in 90s (legend)"]},
+  {id:"bouquet_who",label:"Who catches the bouquet?",emoji:"💐",category:"Rec
